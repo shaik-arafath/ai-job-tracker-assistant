@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aijobtracker-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: aijobtracker-backend
+  template:
+    metadata:
+      labels:
+        app: aijobtracker-backend
+    spec:
+      containers:
+        - name: backend
+          image: your-registry/ai-job-tracker-backend:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: aijobtracker-secrets
+                  key: spring-datasource-url
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: aijobtracker-secrets
+                  key: spring-datasource-username
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: aijobtracker-secrets
+                  key: spring-datasource-password
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: aijobtracker-secrets
+                  key: jwt-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aijobtracker-backend
+spec:
+  selector:
+    app: aijobtracker-backend
+  ports:
+    - port: 8080
+      targetPort: 8080
